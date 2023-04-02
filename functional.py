@@ -108,11 +108,7 @@ def train_model(model, train_dl, val_dl, optimizer, scheduler, max_epochs: int =
             f"validation_loss: {metrics['ce']:.2f} - " \
             f"validation_f1: {metrics['f1']:.2f}"
         progress_bar.log_message(message)
-
-    @trainer.on(Events.COMPLETED)
-    def huggingface_plot_handler():
-            pass
-    
+   
     trainer.run(train_dl, max_epochs=max_epochs)
     return logs
 
