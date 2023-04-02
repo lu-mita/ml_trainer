@@ -41,7 +41,6 @@ def get_loop_handlers(model, optimizer: torch.optim.Optimizer, patience: int):
         model.train()
         optimizer.zero_grad()
         output = model(**batch)
-        print(batch)
         loss = output.loss
         loss.backward()
         optimizer.step()
