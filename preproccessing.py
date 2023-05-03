@@ -71,6 +71,7 @@ def preprocess_text(text: str, do_lower_case: bool = False, strategy: str = "tra
             if not bad:
                 out += t.text_with_ws
         out = re.sub(r"""([?.!,;"'])""", r" ", out)
+        out = re.sub(r'(\w)\1{2,}', r'\1\1', out)
         out = out.translate(str.maketrans('', '', string.punctuation))
         out = EMOJI_PATTERN.sub(r'', out)
         out = _RE_COMBINE_WHITESPACE.sub(" ", out).strip()
