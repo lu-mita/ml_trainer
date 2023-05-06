@@ -2,6 +2,7 @@ import pickle
 
 import numpy as np
 import torch
+
 from sklearn.preprocessing import MultiLabelBinarizer
 from transformers import BertForSequenceClassification, AutoTokenizer
 
@@ -13,6 +14,13 @@ class EmotionRecognizer:
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         with open(labels_mapping_path, "rb") as f:
             mapper: MultiLabelBinarizer = pickle.load(f)
+        
+        self.type_map = {
+            'input_ids': torch.long,
+            'attention_mask': torch.float,
+            'token_type_ids': torch.long,
+            'labels': torch.float
+        }
         self.le = mapper
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model.to(self.device)
@@ -31,13 +39,15 @@ class EmotionRecognizer:
         Normalized preditions are obtained by applying a sigmoid function to the raw preditions and then applying a treshold
         """
         encodings = self.tokenizer(text, add_special_tokens=True)
-        encodings = {k: v.to(self.device) for k, v in encodings.items()}
-        input_ids = torch.tensor(encodings['input_ids']).unsqueeze(0).long().to(self.device)
-        attention_mask = torch.tensor(encodings['attention_mask']).unsqueeze(0).long().to(self.device)
-        token_type_ids = torch.tensor(encodings['token_type_ids']).unsqueeze(0).long().to(self.device)
+
+        encodings = {
+            k: torch.tensor(v, dtype=self.type_map[k]) \
+                     .unsqueeze(0) \
+                     .to(self.device) for k, v in encodings.items()
+        }
 
         with torch.no_grad():
-            output = self.model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+            output = self.model(**encodings)
             predictions = torch.sigmoid(output.logits)
             predictions = torch.where(predictions > treshold, 1, 0)
             return predictions.detach().numpy()
