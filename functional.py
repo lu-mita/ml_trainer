@@ -169,9 +169,9 @@ def transform_report(report, prefix: str = ""):
     return metrics_to_log
 
 
-def model_init(model_ref: str = "dbmdz/bert-base-italian-xxl-cased", num_labels: int = 10, hidden_dropout_prob: float = 0.1, **kwargs):
+def model_init(model_name: str = "dbmdz/bert-base-italian-xxl-cased", num_labels: int = 10, hidden_dropout_prob: float = 0.1, **kwargs):
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_ref,
+        model_name,
         num_labels=num_labels,
         problem_type="multi_label_classification",
         output_attentions=False,
@@ -180,3 +180,4 @@ def model_init(model_ref: str = "dbmdz/bert-base-italian-xxl-cased", num_labels:
         ignore_mismatched_sizes=True
     )
     return model
+
