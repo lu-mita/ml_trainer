@@ -171,7 +171,7 @@ def transform_report(report, prefix: str = ""):
 
 def model_init(model_ref: str = "dbmdz/bert-base-italian-xxl-cased", num_labels: int = 10, hidden_dropout_prob: float = 0.1, **kwargs):
     model = AutoModelForSequenceClassification.from_pretrained(
-        model_name_or_path,
+        model_ref,
         num_labels=num_labels,
         problem_type="multi_label_classification",
         output_attentions=False,
