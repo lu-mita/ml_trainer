@@ -169,7 +169,7 @@ def transform_report(report, prefix: str = ""):
     return metrics_to_log
 
 
-def model_init(model_name_or_path: str, num_labels: int = 10, hidden_dropout_prob = 0.1, **kwargs):
+def model_init(model_ref: str = "dbmdz/bert-base-italian-xxl-cased", num_labels: int = 10, hidden_dropout_prob: float = 0.1, **kwargs):
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name_or_path,
         num_labels=num_labels,
