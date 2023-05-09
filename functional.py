@@ -130,7 +130,7 @@ def train(
                 f"train_f1: {metrics['f1']:.2f}"
             logs[engine.state.epoch] = {
                 'train_loss': metrics['ce'],
-                'f1': metrics['f1'],
+                'train_f1': metrics['f1'],
                 **transform_report(metrics['report'], prefix="train")
             }
             progress_bar.log_message(message)
@@ -146,7 +146,7 @@ def train(
                 f"validation_f1: {metrics['f1']:.2f}"
             logs[engine.state.epoch].update({
                 'validation_loss': metrics['ce'],
-                'validation_f1-score': metrics['f1'],
+                'f1': metrics['f1'],
                 **transform_report(metrics['report'], prefix="validation")
             })
             progress_bar.log_message(message)
