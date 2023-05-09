@@ -7,25 +7,11 @@ from ekphrasis.dicts.emoticons import emoticons
 from transformers import AutoTokenizer
 import json
 import os
-import spacy
 import string
 
 
-spacy_nlp = spacy.load('it_core_news_sm')
-emoji_dict_path = os.path.join(os.path.dirname(__file__), 'emoji_dictionary.json')
-
-with open(emoji_dict_path, 'r', encoding="utf-8") as fd:
-    emoji_dict = json.load(fd)
-
-
-EMOJI_PATTERN = re.compile(
-    "["
-    u"\U0001F600-\U0001F64F"
-    u"\U0001F300-\U0001F5FF"
-    u"\U0001F680-\U0001F6FF"
-    u"\U0001F1E0-\U0001F1FF"
-    "]+", flags=re.UNICODE)
-_RE_COMBINE_WHITESPACE = re.compile(r"\s+")
+with open(os.path.join(os.path.dirname(__file__), 'emoji_dictionary.json'), 'r', encoding="utf-8") as fd:
+    emoji_translation = json.load(fd)
 
 
 text_processor = TextPreProcessor(
@@ -45,37 +31,17 @@ text_processor = TextPreProcessor(
 )
 
 
-
-def preprocess_text(text: str, do_lower_case: bool = False, strategy: str = "transform") -> str:
-    if strategy == "transform":
-        text = str(" ".join(text_processor.pre_process_doc(text)))
-        if do_lower_case: text = text.lower() 
-        # text = re.sub(r'[^a-zA-ZÀ-ú</>!?♥♡\s\U00010000-\U0010ffff]', ' ', text)
-        dictionary = emoji_dict
-        for emoji in dictionary.keys():
-            text = text.replace(emoji, f"<{dictionary[emoji]}>")
-        text = re.sub(r'\s+', ' ', text)
-        text = re.sub(r'(\w)\1{2,}', r'\1\1', text)
-        text = re.sub(r'^\s', '', text)
-        text = re.sub(r'\s$', '', text)
-        return text
-    else:
-        doc = spacy_nlp(text)
-        out = ''
-        for t in doc:
-            bad = t.like_url
-            bad |= t.text.startswith('@')
-            bad |= t.text.startswith('#')
-            bad |= t.like_email
-            bad |= t.like_num
-            if not bad:
-                out += t.text_with_ws
-        out = re.sub(r"""([?.!,;"'])""", r" ", out)
-        out = re.sub(r'(\w)\1{2,}', r'\1\1', out)
-        out = out.translate(str.maketrans('', '', string.punctuation))
-        out = EMOJI_PATTERN.sub(r'', out)
-        out = _RE_COMBINE_WHITESPACE.sub(" ", out).strip()
-        return out
+def preprocess_text(text: str, do_lower_case: bool = False) -> str:
+    text = str(" ".join(text_processor.pre_process_doc(text)))
+    if do_lower_case: text = text.lower() 
+    # text = re.sub(r'[^a-zA-ZÀ-ú</>!?♥♡\s\U00010000-\U0010ffff]', ' ', text)
+    for emoji in emoji_translation.keys():
+        text = text.replace(emoji, f"<{emoji_translation[emoji]}>")
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'(\w)\1{2,}', r'\1\1', text)
+    text = re.sub(r'^\s', '', text)
+    text = re.sub(r'\s$', '', text)
+    return text
 
 
 def encode_data(model_name_or_path, text_samples: list, label_samples: list, max_length: int = 128):
